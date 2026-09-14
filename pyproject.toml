@@ -1,0 +1,28 @@
+[project]
+name = "sales-intelligence-assistant"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=1.5.9",
+    "faiss-cpu>=1.15.0",
+    "langchain>=1.4.0",
+    "langchain-chroma>=1.1.0",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.6.2",
+    "langchain-google-genai>=4.4.0",
+    "langchain-ollama>=1.1.0",
+    "langchain-text-splitters>=1.1.2",
+    "mysql-connector-python>=26.7.0",
+    "numpy>=2.4.6",
+    "python-dotenv>=1.2.3",
+    "sqlalchemy>=2.0.52",
+    "sqlglot>=30.18.0",
+    "streamlit>=1.63.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
