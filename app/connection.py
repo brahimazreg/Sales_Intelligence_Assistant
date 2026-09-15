@@ -1,8 +1,11 @@
+
 import os
 import mysql.connector
+import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
+
 
 def connect_database():
     db = mysql.connector.connect(
@@ -15,15 +18,21 @@ def connect_database():
 
     return db
 
+
 def execute_query(sql):
     db = connect_database()
 
     try:
         cursor = db.cursor()
         cursor.execute(sql)
+
         response = cursor.fetchall()
 
-        return response
+        columns = [column[0] for column in cursor.description]
+
+        print("COLONNES :", columns)
+
+        return pd.DataFrame(response, columns=columns)
 
     finally:
         cursor.close()

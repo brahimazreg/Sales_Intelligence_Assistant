@@ -1,3 +1,4 @@
+
 from app.llm import get_llm
 
 
@@ -8,61 +9,85 @@ def route_question(question):
     prompt = f"""
 Tu es un routeur pour un assistant d'intelligence commerciale.
 
-Tu dois classer la question utilisateur dans UNE SEULE catégorie :
+Ta tâche est de classer la question utilisateur dans UNE SEULE catégorie.
 
-SQL :
+CATÉGORIES AUTORISÉES :
+
+SQL
 La réponse peut être obtenue uniquement à partir des données
 présentes dans la base MySQL.
 
-RAG :
+RAG
 La question demande uniquement une information métier,
 une définition, une règle, une politique ou une explication
 présente dans la documentation métier.
 
-HYBRID :
+HYBRID
 La question nécessite à la fois :
-- des informations métier provenant de la documentation RAG
-- et des données provenant de MySQL.
+- une information métier provenant de la documentation RAG
+- ET une valeur ou un calcul provenant des données MySQL.
 
-Exemples :
+EXEMPLES :
 
 Question : Quel est le chiffre d'affaires par client ?
-Réponse : SQL
+SQL
 
 Question : Quel est le meilleur produit ?
-Réponse : SQL
+SQL
 
 Question : Quelle est la définition du chiffre d'affaires ?
-Réponse : RAG
+RAG
 
 Question : Quelle est la règle de calcul de la marge ?
-Réponse : RAG
+RAG
 
 Question : Quelle est la marge totale en excluant les commandes annulées ?
-Réponse : HYBRID
+HYBRID
 
-Question utilisateur :
+IMPORTANT :
+
+Ta réponse doit contenir UNIQUEMENT UN des mots suivants :
+
+SQL
+RAG
+HYBRID
+
+N'ajoute aucune explication.
+N'ajoute aucun commentaire.
+N'ajoute aucune ponctuation.
+
+QUESTION UTILISATEUR :
 {question}
 
-Réponds uniquement avec :
-SQL
-ou
-RAG
-ou
-HYBRID
+RÉPONSE :
 """
 
     response = llm.invoke(prompt)
 
-    route = response.content.strip().upper()
+    raw_route = response.content.strip().upper()
 
-    if route not in {"SQL", "RAG", "HYBRID"}:
+    print(f"Route brute retournée par le LLM : {raw_route}")
+
+    # Sécurisation du résultat du LLM.
+    # On cherche d'abord HYBRID car il contient aussi les termes
+    # SQL et RAG dans certaines réponses explicatives.
+    if "HYBRID" in raw_route:
+        route = "HYBRID"
+    elif "SQL" in raw_route:
+        route = "SQL"
+    elif "RAG" in raw_route:
+        route = "RAG"
+    else:
         raise ValueError(
-            f"Route invalide retournée par le LLM : {route}"
+            f"Route invalide retournée par le LLM : {raw_route}"
         )
 
+    print(f"Route normalisée : {route}")
+
     return route
-# just for test
+
+
+# Test
 if __name__ == "__main__":
 
     questions = [

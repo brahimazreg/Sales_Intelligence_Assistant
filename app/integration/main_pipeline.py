@@ -3,26 +3,30 @@ from app.integration.sql_pipeline import question_to_sql
 from app.integration.rag_pipeline import question_to_rag
 from app.integration.hybrid_pipeline import question_to_hybrid
 
+import pandas as pd
+
+
 def process_question(question):
+    """
+    Analyse la question, choisit le pipeline approprié
+    et retourne le résultat.
+    """
 
     route = route_question(question)
 
-    print("\n--- ROUTE ---")
-    print(route)
-    print("--- FIN ROUTE ---\n")
+    print(f"\n--- ROUTE : {route} ---\n")
 
     if route == "SQL":
         return question_to_sql(question)
 
-    if route == "RAG":
+    elif route == "RAG":
         return question_to_rag(question)
 
-    if route == "HYBRID":
+    elif route == "HYBRID":
         return question_to_hybrid(question)
 
-    raise ValueError(
-        f"Route non gérée pour le moment : {route}"
-    )
+    else:
+        raise ValueError(f"Route inconnue : {route}")
 
 
 if __name__ == "__main__":
@@ -43,8 +47,12 @@ if __name__ == "__main__":
 
         print("\n--- RÉSULTAT ---")
 
-        if isinstance(result, list):
+        if isinstance(result, pd.DataFrame):
+            print(result.to_string(index=False))
+
+        elif isinstance(result, list):
             for row in result:
                 print(row)
+
         else:
             print(result)

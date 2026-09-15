@@ -1,343 +1,131 @@
-# Progress — Sales Intelligence Assistant
+# Progress - Sales Intelligence Assistant
 
-## Architecture actuelle
+## État du projet
+Date : 2026-09-14
 
-Le projet est organisé en 3 parties distinctes :
-
-1. **Projet 1 — Text-to-SQL original**
-
-   * Génération SQL avec Qwen 3 8B via Ollama
-   * Validation avec SQLGlot
-   * Exécution MySQL
-   * Projet original conservé et fonctionnel
-
-2. **Projet 2 — RAG**
-
-   * Documents Markdown dans `rag_documents/`
-   * Chunking par titres
-   * Embeddings avec `nomic-embed-text`
-   * ChromaDB persistant
-   * Retrieval fonctionnel
-   * Projet RAG conservé indépendamment
-
-3. **Projet 3 — Intégration RAG + Text-to-SQL**
-
-   * Code dans `app/integration/`
-   * Le RAG récupère le contexte métier
-   * Le contexte RAG est envoyé à Qwen avec la question et le schéma
-   * Qwen génère le SQL
-   * SQLGlot valide le SQL
-   * MySQL exécute la requête
-
-Le Router SQL/RAG/HYBRID et MCP sont prévus plus tard. Ils ne sont PAS encore implémentés.
+Le projet utilise :
+- Python
+- Streamlit
+- MySQL
+- ChromaDB pour le RAG
+- Ollama / Qwen pour le LLM
+- architecture SQL / RAG / HYBRID
 
 ---
 
-## Structure importante
+## 1. Architecture actuelle
 
-```text
-app/
-├── config.py
-├── connection.py
-├── schema.py
-├── llm.py
-├── generator.py              # Projet Text-to-SQL original — NE PAS MODIFIER
-├── validator.py
-├── executor.py
-├── rag/
-│   ├── documents.py
-│   ├── embeddings.py
-│   ├── vectorstore.py
-│   └── retriever.py
-└── integration/
-    ├── generator_with_rag.py
-    └── pipeline.py
-```
+Le flux principal est :
 
-Tests :
-
-```text
-tests/
-├── test_schema.py
-├── test_llm.py
-├── test_generator.py
-├── test_validator.py
-├── test_documents.py
-├── test_splitter.py
-├── test_embeddings.py
-├── test_vector_store.py
-├── test_generator_with_rag.py
-└── test_integration_pipeline.py
-```
-
----
-
-## Règle de développement
-
-Développement incrémental obligatoire :
-
-1. Implement
-2. Test
-3. Verify
-4. Validate
-5. Seulement ensuite passer à l'étape suivante
-
-Ne pas modifier plusieurs composants simultanément.
-
-Préserver les projets originaux.
-
----
-
-# État actuel — Intégration RAG + Text-to-SQL
-
-L'intégration fonctionne.
-
-Pipeline actuel :
-
-```text
-Question
-   ↓
-RAG Retriever
-   ↓
-Contexte métier
-   ↓
-Qwen 3 8B
-   ↓
-SQL
-   ↓
-SQLGlot
-   ↓
-Validation tables/colonnes
-   ↓
-MySQL
-   ↓
+Question utilisateur
+        ↓
+main_pipeline.py
+        ↓
+router.py
+        ↓
+SQL / RAG / HYBRID
+        ↓
 Résultat
-```
-
-Fichiers principaux :
-
-* `app/integration/generator_with_rag.py`
-* `app/integration/pipeline.py`
-* `tests/test_integration_pipeline.py`
+        ↓
+Streamlit
 
 ---
 
-## Correction importante effectuée
+## 2. RAG
 
-Un problème a été découvert avec la génération de CTE.
+Le fichier `app/rag/retriever.py` contient :
 
-Qwen pouvait générer une structure du type :
+- `embedding_question()`
+- `retrieve_question(question, top_k)`
 
-```sql
-SELECT ...
-FROM ...
-...
-),
-product_margin AS (
-...
-)
-SELECT ...
-```
+La fonction correcte est :
 
-sans générer le `WITH` initial.
+```python
+retrieve_question
 
-SQLGlot rejetait correctement cette requête.
 
-### Correction
+PROCHAINE ÉTAPE
 
-Le prompt de `app/integration/generator_with_rag.py` a été renforcé avec :
+Je me suis arrêté ici.
 
-```text
-- uniquement SELECT / WITH SELECT
-- Si tu utilises des CTE (WITH), le mot-clé WITH doit obligatoirement
-  être placé au tout début de la requête.
-- La requête générée doit être une requête SQL complète et syntaxiquement
-  valide en MySQL.
-```
+Objectif immédiat :
 
-Ne pas modifier `validator.py` pour corriger ce problème : le problème venait de la génération Qwen.
+Améliorer l'affichage Streamlit
 
----
+Actuellement :
 
-# Tests d'intégration
+Question :
+Quelle est la marge totale en excluant les commandes annulées ?
 
-Fichier :
-
-```text
-tests/test_integration_pipeline.py
-```
-
-Tests présents :
-
-```text
-test_chiffre_affaires_total
-test_meilleur_produit
-test_marge_totale
-test_produits_a_reapprovisionner
-test_chiffre_affaires_par_client
-```
-
-### Résultats connus
-
-Les quatre premiers tests avaient déjà été validés.
-
-Le test `test_meilleur_produit` avait initialement échoué à cause du problème de CTE décrit ci-dessus.
-
-Après modification du prompt, le test ciblé a été relancé :
-
-```powershell
-uv run pytest tests/test_integration_pipeline.py::test_meilleur_produit -v
-```
-
-Résultat :
-
-```text
-tests/test_integration_pipeline.py::test_meilleur_produit PASSED
-
-1 passed in 505.71s (0:08:25)
-```
-
-Donc le problème de CTE est maintenant corrigé et vérifié.
-
----
-
-# Dernière étape effectuée
-
-Le test ciblé `test_meilleur_produit` vient de passer.
-
-La suite complète n'a PAS encore été relancée après cette correction.
-
-## PROCHAINE ACTION EXACTE
-
-À la prochaine session, NE PAS modifier le code immédiatement.
-
-Commencer par lancer :
-
-```powershell
-uv run pytest tests/test_integration_pipeline.py -v
-```
+Réponse :
+Marge totale : 18900.47
 
 Objectif :
 
-```text
-5 tests passed
-```
+La marge totale, hors commandes annulées, est de 18 900,47 €.
 
-Si les 5 tests passent :
+Mais les résultats tabulaires doivent continuer à être affichés comme des tableaux.
 
-1. Verify
-2. Validate l'intégration complète
-3. Vérifier qu'aucun ancien composant n'a été modifié inutilement
-4. Nettoyer le `print` de debug présent actuellement dans `app/integration/pipeline.py` :
+Il faut donc examiner le fichier Streamlit principal (app.py, streamlit_app.py ou autre) avant de modifier l'affichage.
 
-```python
-print("\n--- SQL GÉNÉRÉ ---")
-print(sql_generated)
-print("--- FIN SQL ---\n")
-```
+Tests déjà validés
+RAG
 
-Puis relancer les tests concernés après ce nettoyage.
+Question :
 
-Ne pas commencer le Router, MCP ou une nouvelle fonctionnalité avant d'avoir terminé cette validation.
+Quelle est la définition du chiffre d'affaires ?
 
----
+→ RAG fonctionne.
 
-# Commande uv importante
+HYBRID
 
-Le projet utilise `uv`.
+Question :
 
-Utiliser :
+Quelle est la marge totale en excluant les commandes annulées ?
 
-```powershell
-uv run pytest ...
-```
+→ HYBRID fonctionne.
 
-et non :
+Résultat :
 
-```powershell
-pytest ...
-```
+18900.47000000
+SQL
 
-car `pytest` seul peut utiliser le Python global au lieu de `.venv`.
+Question :
 
----
+Quel est le chiffre d'affaires par client ?
 
-# État de la base de données
+→ doit être testé/validé dans le pipeline complet.
 
-Les statuts actuels de `orders.status` sont :
+Fichiers principaux
+app/
+├── main_pipeline.py
+├── router/
+│   └── router.py
+├── rag/
+│   ├── retriever.py
+│   └── embeddings.py
+├── integration/
+│   ├── sql_pipeline.py
+│   ├── rag_pipeline.py
+│   ├── hybrid_pipeline.py
+│   └── generator_with_rag.py
+├── connection.py
+├── validator.py
+├── schema.py
+└── llm.py
+Point de reprise
 
-```text
-delivred
-shipped
-confirmed
-pending
-```
+Quand on reprend le projet :
 
-Il n'existe actuellement aucune commande avec le statut `canceled` ou `cancelled`.
+Vérifier le fichier Streamlit principal.
+Améliorer l'affichage des résultats SQL/HYBRID.
+Transformer les résultats simples en phrases naturelles.
+Garder les DataFrames pour les requêtes nécessitant un tableau.
+Harmoniser les règles métier RAG concernant les remises.
+Tester les trois routes :
+SQL
+RAG
+HYBRID
+Tester ensuite l'application Streamlit de bout en bout.
 
-La règle métier concernant l'exclusion des commandes annulées reste présente dans le prompt, mais elle ne peut pas être réellement testée avec les données actuelles.
-
-Ne pas modifier les données ou le code uniquement pour cette raison.
-
----
-
-# Business rules importantes
-
-Le prompt doit conserver les règles métier du Text-to-SQL original :
-
-### Revenue
-
-```text
-quantity * unit_price * (1 - discount_percent / 100)
-```
-
-### Cost
-
-```text
-quantity * products.cost_price
-```
-
-### Margin
-
-```text
-revenue - cost
-```
-
-Autres règles :
-
-* uniquement SELECT ou WITH SELECT
-* aucune écriture/modification de données
-* ne pas inventer de tables ou colonnes
-* utiliser les JOIN appropriés
-* `order_date` pour les périodes temporelles
-* `order_items.unit_price` = prix de vente
-* `products.cost_price` = prix de revient
-* TOP N → `ORDER BY` + `LIMIT`
-* exclusion des commandes annulées sauf demande explicite
-* si CTE utilisé : `WITH` doit être au début
-* SQL complet et syntaxiquement valide MySQL
-
----
-
-# Objectif immédiat
-
-Finir et valider complètement :
-
-```text
-Projet 3 — Intégration RAG + Text-to-SQL
-```
-
-avant de commencer une nouvelle architecture.
-
-Dernier point confirmé :
-
-```text
-test_meilleur_produit → PASSED
-```
-
-Prochaine commande :
-
-```powershell
-uv run pytest tests/test_integration_pipeline.py -v
-```
-Avec ça, si tu reviens plus tard et me dis simplement “on reprend le projet”, je pourrai repartir de cette étape : la correction CTE est validée, et il reste à lancer la suite complète des 5 tests avant le nettoyage/validation finale.
+Avec ce `progress.md`, si tu reviens plus tard et me dis simplement **« reprenons le projet depuis progress.md »**, j'aurai le contexte nécessaire pour reprendre directement au niveau de **l'affichage Streamlit**, sans refaire tout le debugging précédent.

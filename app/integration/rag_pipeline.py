@@ -1,12 +1,21 @@
-from app.rag.retriever import retrive_question, build_context
+
+from app.rag.retriever import retrieve_question
 from app.integration.generator_rag import generate_rag_answer
 from app import config
+
+
+def build_context(documents):
+    """
+    Transforme les documents récupérés par Chroma
+    en un seul contexte texte pour le LLM.
+    """
+    return "\n\n--- DOCUMENT ---\n\n".join(documents)
 
 
 def question_to_rag(question):
 
     # 1. Récupérer les documents depuis Chroma
-    documents = retrive_question(
+    documents = retrieve_question(
         question,
         config.TOP_K_RESULT
     )
@@ -32,3 +41,4 @@ if __name__ == "__main__":
     print("\n--- RÉPONSE RAG ---")
     print(answer)
     print("--- FIN RÉPONSE ---")
+

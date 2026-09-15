@@ -8,7 +8,7 @@ collection = chroma_client.get_or_create_collection(
     name="rag_collection_sales"
 )
 
-def retrive_question(question, top_k):
+def retrieve_question(question, top_k):
 
     vector_question = embedding_question(question)
 
@@ -19,9 +19,12 @@ def retrive_question(question, top_k):
 
     documents = results["documents"][0]
 
-    return documents
-# transform documents into context
-def build_context(documents):
-    context = "\n\n".join(documents)
+    print("\n--- DOCUMENTS RÉCUPÉRÉS ---")
 
-    return context
+    for i, document in enumerate(documents, 1):
+        print(f"\nDOCUMENT {i}:")
+        print(document)
+
+    print("\n--- FIN DOCUMENTS ---\n")
+
+    return documents

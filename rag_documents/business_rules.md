@@ -2,17 +2,17 @@
 
 ## Chiffre d'affaires
 
-Le chiffre d'affaires correspond à la somme du montant de chaque ligne de commande.
+Le chiffre d'affaires d'une ligne de commande est calculé comme suit :
 
-Formule :
+quantity * unit_price * (1 - discount_percent / 100)
 
-quantity × unit_price
+Le chiffre d'affaires total est :
 
-SQL :
+SUM(
+    quantity * unit_price * (1 - discount_percent / 100)
+)
 
-SUM(order_items.quantity * order_items.unit_price)
-
-Les commandes annulées ne doivent pas être prises en compte dans le calcul du chiffre d'affaires.
+Les commandes annulées sont exclues.
 
 ---
 

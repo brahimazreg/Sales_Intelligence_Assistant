@@ -1,8 +1,9 @@
 from app.schema import extract_schema
-from app.rag.retriever import retrive_question, build_context
+from app.rag.retriever import retrieve_question
 from app.integration.generator_with_rag import generate_sql_with_rag
 from app.validator import validate_sql, validate_table, validate_column
 from app.connection import execute_query
+from app.integration.rag_pipeline import build_context
 from app import config
 
 
@@ -12,7 +13,7 @@ def question_to_hybrid(question):
     schema = extract_schema()
 
     # 2. Récupérer le contexte métier depuis Chroma
-    documents = retrive_question(
+    documents = retrieve_question(
         question,
         config.TOP_K_RESULT
     )
@@ -50,6 +51,9 @@ if __name__ == "__main__":
     result = question_to_hybrid(question)
 
     print("\n--- RÉSULTAT HYBRID ---")
-
-    for row in result:
-        print(row)
+    print(result)
+    print("\n--- VALEURS ---")
+    print(result.to_string(index=False))
+    print("\n--- DICT ---")
+    print(result.to_dict(orient="records"))
+    print("--- FIN RÉSULTAT ---")
