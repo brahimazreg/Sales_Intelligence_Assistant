@@ -28,10 +28,13 @@ Le chiffre d'affaires d'un client correspond au montant total de ses commandes.
 
 Formule :
 
-SUM(order_items.quantity * order_items.unit_price)
+SUM(
+    order_items.quantity
+    * order_items.unit_price
+    * (1 - order_items.discount_percent / 100)
+)
 
 Les commandes annulées sont exclues.
-
 ---
 
 ## Meilleur client

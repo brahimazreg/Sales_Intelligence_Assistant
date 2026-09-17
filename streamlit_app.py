@@ -82,32 +82,25 @@ def display_result(result):
         # ------------------------------------------
 
         column_names = {
-            "customer_id": "Client",
+            "customer_id": "ID Client",
             "client_id": "Client",
-            "product_id": "Produit",
+            "product_id": "ID Produit",
             "order_id": "Commande",
-
             "chiffre_affaires": "Chiffre d'affaires",
             "ca": "Chiffre d'affaires",
             "revenue": "Chiffre d'affaires",
             "total_revenue": "Chiffre d'affaires",
-
             "marge": "Marge",
             "margin": "Marge",
             "total_margin": "Marge totale",
-
             "quantity": "Quantité",
             "quantite": "Quantité",
-
             "count": "Nombre",
             "order_count": "Nombre de commandes",
-
             "date": "Date",
             "month": "Mois",
             "year": "Année",
-
             "status": "Statut",
-
             "name": "Nom",
             "product_name": "Produit",
             "customer_name": "Client"

@@ -63,3 +63,10 @@ Un produit doit être réapprovisionné lorsque la quantité actuellement dispon
 Condition :
 
 stock_quantity < reorder_level
+
+`discount_percent` représente le pourcentage de remise appliqué au prix de la ligne de commande.
+
+Exemple :
+- discount_percent = 0 signifie aucune remise.
+- discount_percent = 10 signifie une remise de 10 %.
+- discount_percent = 20 signifie une remise de 20 %.

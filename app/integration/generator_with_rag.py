@@ -47,6 +47,10 @@ quantity * (
 4. Les commandes annulées doivent être exclues du calcul,
 sauf si l'utilisateur demande explicitement de les inclure.
 
+5. Pour identifier les commandes annulées, la valeur exacte de la colonne
+status est 'Cancelled' (avec deux l et une majuscule).
+N'utilise pas 'canceled', 'CANCELED', 'cancelled' ou une autre variante.
+
 ========================
 CONTEXTE RAG
 ========================

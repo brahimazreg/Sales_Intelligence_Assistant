@@ -74,9 +74,11 @@ Les commandes annulées sont exclues.
 
 Le chiffre d'affaires généré par un produit est calculé avec :
 
-SUM(order_items.quantity * order_items.unit_price)
-
-Les commandes annulées sont exclues.
+SUM(
+    order_items.quantity
+    * order_items.unit_price
+    * (1 - order_items.discount_percent / 100)
+)
 
 ---
 

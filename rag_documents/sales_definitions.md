@@ -42,14 +42,19 @@ Le prix utilisé pour calculer le chiffre d'affaires doit être celui de la lign
 
 Le chiffre d'affaires d'une ligne de commande est calculé avec :
 
-order_items.quantity * order_items.unit_price
+order_items.quantity
+* order_items.unit_price
+* (1 - order_items.discount_percent / 100)
 
 Le chiffre d'affaires total est :
 
-SUM(order_items.quantity * order_items.unit_price)
+SUM(
+    order_items.quantity
+    * order_items.unit_price
+    * (1 - order_items.discount_percent / 100)
+)
 
 Les commandes annulées doivent être exclues.
-
 ---
 
 ## Statut d'une commande

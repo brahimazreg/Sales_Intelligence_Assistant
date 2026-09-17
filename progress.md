@@ -1,131 +1,58 @@
-# Progress - Sales Intelligence Assistant
+## Progress — 16/09/2026
 
-## État du projet
-Date : 2026-09-14
+### Tests fonctionnels réalisés
 
-Le projet utilise :
-- Python
-- Streamlit
-- MySQL
-- ChromaDB pour le RAG
-- Ollama / Qwen pour le LLM
-- architecture SQL / RAG / HYBRID
+**SQL :**
 
----
+* Commandes annulées → 1 commande, `order_id = 40` → ✅
+* Total commandes → 39 affiché → ⚠️ cohérent avec les commandes `Delivered`, mais à surveiller car la base contient 40 commandes.
+* Commandes > 1000 € → résultats obtenus → ✅ à confirmer plus tard
+* Commandes par commercial → 20 / 10 / 6 / 3 = 39 → ⚠️ la commande 40 est `Cancelled`
+* Commandes de décembre 2024 → commandes 36 à 40 → ✅
+* Clients → colonnes correctes → ✅
+* Clients Gold → 1, 5, 7 → ✅
+* Clients Premium → 2, 3, 6 → ✅
+* Clients par type → Gold 3 / Premium 3 / Standard 4 → ✅
+* Montant total des commandes livrées → 85 270 € → ✅
+* Montant moyen → 2 186,41 € → ⚠️ basé sur 39 commandes
+* Commande 40 → montant `None`
+* Commercial avec le plus de commandes → Sophie Martin, 20 → ⚠️ à confirmer avec les données
+* Commandes annulées par commercial → commercial 4 : 1 → ✅
+* Clients ayant une commande annulée → Retail Plus / Nathalie Simon → ✅ HYBRID
 
-## 1. Architecture actuelle
+### RAG
 
-Le flux principal est :
+* « Quelle est la politique de retour ? » → information non disponible → ⚠️
+* « Que dit la documentation concernant les clients insatisfaits ? » → information non disponible → ⚠️
+* Il faut tester le RAG avec une information dont on sait qu'elle existe réellement dans les documents.
 
-Question utilisateur
-        ↓
-main_pipeline.py
-        ↓
-router.py
-        ↓
-SQL / RAG / HYBRID
-        ↓
-Résultat
-        ↓
-Streamlit
+### Vérification technique
 
----
+La base MySQL utilisée par Docker est correcte :
 
-## 2. RAG
+* `DB_HOST = host.docker.internal`
+* `DB_NAME = sales_rag`
+* Total réel dans `orders` = **40**
+* `Delivered` = **39**
+* `Cancelled` = **1**
+* Commande `40` = `sales_rep_id 4`, `Cancelled`
+* `mysql.connector` fonctionne dans le container.
 
-Le fichier `app/rag/retriever.py` contient :
+### État
 
-- `embedding_question()`
-- `retrieve_question(question, top_k)`
+**SQL :** globalement fonctionnel ✅
+**HYBRID :** fonctionnel ✅
+**RAG :** à approfondir ⚠️
+**Base MySQL :** correcte ✅
 
-La fonction correcte est :
+### Reprendre demain
 
-```python
-retrieve_question
+**NE PAS refaire le seed ni réinitialiser la base.**
 
+Commencer par tester :
 
-PROCHAINE ÉTAPE
+> Quels sont les clients qui n'ont jamais passé de commande ?
 
-Je me suis arrêté ici.
+Puis poursuivre les tests fonctionnels SQL/RAG/HYBRID.
 
-Objectif immédiat :
-
-Améliorer l'affichage Streamlit
-
-Actuellement :
-
-Question :
-Quelle est la marge totale en excluant les commandes annulées ?
-
-Réponse :
-Marge totale : 18900.47
-
-Objectif :
-
-La marge totale, hors commandes annulées, est de 18 900,47 €.
-
-Mais les résultats tabulaires doivent continuer à être affichés comme des tableaux.
-
-Il faut donc examiner le fichier Streamlit principal (app.py, streamlit_app.py ou autre) avant de modifier l'affichage.
-
-Tests déjà validés
-RAG
-
-Question :
-
-Quelle est la définition du chiffre d'affaires ?
-
-→ RAG fonctionne.
-
-HYBRID
-
-Question :
-
-Quelle est la marge totale en excluant les commandes annulées ?
-
-→ HYBRID fonctionne.
-
-Résultat :
-
-18900.47000000
-SQL
-
-Question :
-
-Quel est le chiffre d'affaires par client ?
-
-→ doit être testé/validé dans le pipeline complet.
-
-Fichiers principaux
-app/
-├── main_pipeline.py
-├── router/
-│   └── router.py
-├── rag/
-│   ├── retriever.py
-│   └── embeddings.py
-├── integration/
-│   ├── sql_pipeline.py
-│   ├── rag_pipeline.py
-│   ├── hybrid_pipeline.py
-│   └── generator_with_rag.py
-├── connection.py
-├── validator.py
-├── schema.py
-└── llm.py
-Point de reprise
-
-Quand on reprend le projet :
-
-Vérifier le fichier Streamlit principal.
-Améliorer l'affichage des résultats SQL/HYBRID.
-Transformer les résultats simples en phrases naturelles.
-Garder les DataFrames pour les requêtes nécessitant un tableau.
-Harmoniser les règles métier RAG concernant les remises.
-Tester les trois routes :
-SQL
-RAG
-HYBRID
-Tester ensuite l'application Streamlit de bout en bout.
-
-Avec ce `progress.md`, si tu reviens plus tard et me dis simplement **« reprenons le projet depuis progress.md »**, j'aurai le contexte nécessaire pour reprendre directement au niveau de **l'affichage Streamlit**, sans refaire tout le debugging précédent.
+Le point à surveiller est la différence entre **40 commandes réelles** et certains résultats à **39**, sans modifier le code avant d'avoir identifié précisément la cause.

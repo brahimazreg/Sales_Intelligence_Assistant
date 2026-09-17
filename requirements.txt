@@ -1,6 +1,7 @@
 langchain
 langchain-core
 langchain-community
+langchain-ollama
 
 langchain_text_splitters
 faiss-cpu
@@ -10,4 +11,6 @@ streamlit
 python-dotenv
 numpy
 
-mysql-connector-python 
+mysql-connector-python
+sqlglot
+chromadb

@@ -15,6 +15,11 @@ def process_question(question):
     route = route_question(question)
 
     print(f"\n--- ROUTE : {route} ---\n")
+    print("\n" + "=" * 70)
+    print("QUESTION :", question)
+    print("--- ROUTE ---")
+    print(route)
+
 
     if route == "SQL":
         return question_to_sql(question)
@@ -28,7 +33,9 @@ def process_question(question):
     else:
         raise ValueError(f"Route inconnue : {route}")
 
-
+    print("--- RÉSULTAT ---")
+    print(result)
+    print("=" * 70)
 if __name__ == "__main__":
 
     questions = [
