@@ -1,0 +1,76 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: sales_mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+    
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sales_rag_backup.sql:/docker-entrypoint-initdb.d/sales_rag_backup.sql:ro
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sales_ollama
+    restart: unless-stopped
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+
+  streamlit:
+    build: .
+    container_name: sales_streamlit
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+
+    ports:
+      - "8501:8501"
+
+
+volumes:
+  mysql_data:
+  ollama_data:

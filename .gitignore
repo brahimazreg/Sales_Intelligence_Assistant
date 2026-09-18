@@ -1,6 +1,18 @@
 .venv/
+venv/
 __pycache__/
 *.pyc
+
 .env
+.streamlit/secrets.toml
+
+# Données / backups locaux
+*.sql
 chroma_db/
+
+# Fichiers IDE
+.vscode/
+.idea/
+
+# Fichiers projet locaux
 progress.md
