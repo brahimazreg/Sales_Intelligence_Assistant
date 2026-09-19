@@ -1,3 +1,7 @@
+
+
+<img src="./Sales_Intelligence_Assistant_Image.png" alt="Description de l'image" width="500">
+
 # Sales Intelligence Assistant
 
 Assistant d'intelligence commerciale permettant d'interroger des données de vente en langage naturel.
