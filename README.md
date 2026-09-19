@@ -1,6 +1,6 @@
 
 
-                <img src="./Sales_Intelligence_Assistant_Image.png" alt="Description de l'image" width="500">
+<img src="./Sales_Intelligence_Assistant_Image.png" alt="Description de l'image" width="500">
 
 # Sales Intelligence Assistant
 
